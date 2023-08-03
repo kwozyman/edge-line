@@ -1,0 +1,72 @@
+---
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: edge-commit
+spec:
+  params:
+  - name: blueprintName
+    type: string
+  - name: apiEndpoint
+    type: string
+    default: http://imagebuilder.edges-operator:8080/api/v1
+  - name: composeMetadata
+    type: string
+    default: compose.json
+  - name: containerImage
+    type: string
+    default: quay.io/cgament/composer-cli
+  tasks:
+  - name: prepare-data
+    taskRef:
+      kind: Task
+      name: prepare-data
+    params:
+    - name: blueprintName
+      value: $(params.blueprintName)
+    - name: composeMetadata
+      value: $(params.composeMetadata)
+    - name: containerImage
+      value: $(params.containerImage)
+    workspaces:
+      - name: blueprints
+      - name: shared-volume
+  - name: generate-commit
+    taskRef:
+      kind: Task
+      name: generate-commit
+    runAfter:
+      - prepare-data
+    params:
+    - name: blueprintName
+      value: $(params.blueprintName)
+    - name: apiEndpoint
+      value: $(params.apiEndpoint) 
+    - name: composeMetadata
+      value: $(params.composeMetadata)
+    - name: containerImage
+      value: $(params.containerImage)
+    workspaces:
+      - name: blueprints
+      - name: shared-volume
+  - name: download-extract-commit
+    taskRef:
+      kind: Task
+      name: download-extract-commit
+    runAfter:
+      - generate-commit
+    params:
+    - name: blueprintName
+      value: $(params.blueprintName)
+    - name: apiEndpoint
+      value: $(params.apiEndpoint) 
+    - name: composeMetadata
+      value: $(params.composeMetadata)
+    - name: containerImage
+      value: $(params.containerImage)
+    workspaces:
+      - name: blueprints
+      - name: shared-volume
+  workspaces:
+  - name: blueprints
+  - name: shared-volume

@@ -1,0 +1,50 @@
+---
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: generate-commit
+spec:
+  params:
+  - name: blueprintName
+    type: string
+  - name: apiEndpoint
+    type: string
+  - name: composeMetadata
+    type: string
+  - name: containerImage
+    type: string
+  steps:
+  - command:
+    - /usr/bin/curl
+    - -H
+    - 'Content-Type: text/x-toml'
+    - --data-binary
+    - '@/workspace/blueprints/$(params.blueprintName)'
+    - $(params.apiEndpoint)/blueprints/new
+    - --silent
+    image: $(params.containerImage)
+    name: push-blueprint
+  - command:
+    - /usr/bin/curl
+    - -H
+    - 'Content-Type: application/json'
+    - --data
+    - '{"blueprint_name":"$(params.blueprintName)","compose_type":"edge-commit"}'
+    - $(params.apiEndpoint)/compose
+    - --output
+    - /workspace/shared-volume/$(params.blueprintName)/$(params.composeMetadata)
+    - --silent
+    image: $(params.containerImage)
+    name: start-compose
+  - image: $(params.containerImage)
+    name: wait-for-finish
+    script: |
+      #!/bin/bash
+      set -e
+      compose_id=$(jq '.build_id' -r /workspace/shared-volume/$(params.blueprintName)/$(params.composeMetadata))
+      while /usr/bin/curl "$(params.apiEndpoint)/compose/queue" --silent | jq -r '.run[].id' | grep ${compose_id} || usr/bin/curl "$(params.apiEndpoint)/compose/queue" --silent | jq -r '.new[].id' | grep ${compose_id}; do sleep 30; done
+      /usr/bin/curl "$(params.apiEndpoint)/compose/failed" --silent | jq -r '.failed[].id' | grep "${compose_id}" && echo "Compose ${compose_id} failed!" && exit 1
+      /usr/bin/curl "$(params.apiEndpoint)/compose/finished" --silent | jq -r --arg id "${composer_id}" '.finished[] | select (.id==$id)'
+  workspaces:
+  - name: shared-volume
+  - name: blueprints

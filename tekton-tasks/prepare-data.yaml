@@ -1,0 +1,30 @@
+---
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: prepare-data
+spec:
+  params:
+  - name: blueprintName
+    type: string
+  - name: composeMetadata
+    type: string
+  - name: containerImage
+    type: string
+  steps:
+  - command:
+    - /bin/bash
+    - -c
+    - mkdir -p "/workspace/shared-volume/$(params.blueprintName)" && echo Using blueprint
+      $(params.blueprintName)
+    image: $(params.containerImage)
+    name: create-directory
+  - command:
+    - /bin/bash
+    - -c
+    - rm -fv "workspace/shared-volume/$(params.blueprintName)/$(params.composeMetadata)"
+    image: $(params.containerImage)
+    name: remove-compose-file
+  workspaces:
+  - name: shared-volume
+  - name: blueprints
