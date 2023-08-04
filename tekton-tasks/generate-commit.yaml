@@ -13,13 +13,15 @@ spec:
     type: string
   - name: containerImage
     type: string
+  - name: blueprintGitPath
+    type: string
   steps:
   - command:
     - /usr/bin/curl
     - -H
     - 'Content-Type: text/x-toml'
     - --data-binary
-    - '@/workspace/blueprints/$(params.blueprintName)'
+    - '@/workspace/shared-volume/$(params.blueprintName)/blueprints/$(params.blueprintGitPath)'
     - $(params.apiEndpoint)/blueprints/new
     - --silent
     image: $(params.containerImage)
@@ -47,4 +49,3 @@ spec:
       /usr/bin/curl "$(params.apiEndpoint)/compose/finished" --silent | jq -r --arg id "${composer_id}" '.finished[] | select (.id==$id)'
   workspaces:
   - name: shared-volume
-  - name: blueprints

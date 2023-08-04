@@ -16,6 +16,13 @@ spec:
   - name: containerImage
     type: string
     default: quay.io/cgament/composer-cli
+  - name: blueprintGit
+    type: string
+  - name: blueprintGitBranch
+    type: string
+    default: master
+  - name: blueprintGitPath
+    type: string
   tasks:
   - name: prepare-data
     taskRef:
@@ -28,8 +35,11 @@ spec:
       value: $(params.composeMetadata)
     - name: containerImage
       value: $(params.containerImage)
+    - name: blueprintGit
+      value: $(params.blueprintGit)
+    - name: blueprintGitBranch
+      value: $(params.blueprintGitBranch)
     workspaces:
-      - name: blueprints
       - name: shared-volume
   - name: generate-commit
     taskRef:
@@ -46,8 +56,9 @@ spec:
       value: $(params.composeMetadata)
     - name: containerImage
       value: $(params.containerImage)
+    - name: blueprintGitPath
+      value: $(params.blueprintGitPath)
     workspaces:
-      - name: blueprints
       - name: shared-volume
   - name: download-extract-commit
     taskRef:
@@ -65,8 +76,6 @@ spec:
     - name: containerImage
       value: $(params.containerImage)
     workspaces:
-      - name: blueprints
       - name: shared-volume
   workspaces:
-  - name: blueprints
   - name: shared-volume

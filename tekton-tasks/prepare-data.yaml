@@ -11,20 +11,29 @@ spec:
     type: string
   - name: containerImage
     type: string
+  - name: blueprintGit
+    type: string
+  - name: blueprintGitBranch
+    type: string
   steps:
   - command:
     - /bin/bash
     - -c
-    - mkdir -p "/workspace/shared-volume/$(params.blueprintName)" && echo Using blueprint
-      $(params.blueprintName)
+    - mkdir -p "/workspace/shared-volume/$(params.blueprintName)" "/workspace/shared-volume/$(params.blueprintName)/blueprints"
     image: $(params.containerImage)
-    name: create-directory
+    name: create-directories
+    imagePullPolicy: Always
   - command:
     - /bin/bash
     - -c
     - rm -fv "workspace/shared-volume/$(params.blueprintName)/$(params.composeMetadata)"
     image: $(params.containerImage)
     name: remove-compose-file
+  - name: checkout-blueprints
+    image: $(params.containerImage)
+    command:
+      - /bin/bash
+      - -c
+      - git clone "https://github.com/kwozyman/edge-line.git" "/workspace/shared-volume/$(params.blueprintName)/blueprints" || git -C "/workspace/shared-volume/$(params.blueprintName)/blueprints" pull
   workspaces:
   - name: shared-volume
-  - name: blueprints
