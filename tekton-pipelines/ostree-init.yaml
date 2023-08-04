@@ -1,0 +1,26 @@
+---
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: ostree-repo-init
+spec:
+  params:
+  - name: containerImage
+    type: string
+    default: quay.io/cgament/edge-line:latest
+  - name: repoPath
+    default: repo
+  tasks:
+  - name: init-ostree-repo
+    taskRef:
+      kind: Task
+      name: init-ostree-repo
+    params:
+    - name: containerImage
+      value: $(params.containerImage)
+    - name: repoPath
+      value: $(params.repoPath)
+    workspaces:
+      - name: shared-volume
+  workspaces:
+  - name: shared-volume

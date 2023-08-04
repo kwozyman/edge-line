@@ -1,0 +1,35 @@
+---
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: ostree-refs-import
+spec:
+  params:
+  - name: containerImage
+    type: string
+    default: quay.io/cgament/edge-line:latest
+  - name: repoPath
+    default: repo
+  - name: blueprintName
+    type: string
+  - name: ostreeRef
+    type: string
+    default: rhel/9/x86_64/edge
+  tasks:
+  - name: import-commit
+    taskRef:
+      kind: Task
+      name: import-commit
+    params:
+    - name: blueprintName
+      value: $(params.blueprintName)
+    - name: containerImage
+      value: $(params.containerImage)
+    - name: repoPath
+      value: $(params.repoPath)
+    - name: ostreeRef
+      value: $(params.ostreeRef)
+    workspaces:
+      - name: shared-volume
+  workspaces:
+  - name: shared-volume

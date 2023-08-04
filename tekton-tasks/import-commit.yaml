@@ -1,0 +1,38 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: import-commit
+spec:
+  params:
+    - name: blueprintName
+      type: string
+    - name: repoPath
+      type: string
+      default: repo
+    - name: containerImage
+      type: string
+    - name: ostreeRef
+      type: string
+      default: rhel/9/x86_64/edge
+  steps:
+    - name: pull-local
+      image: $(params.containerImage)
+      command:
+        - /bin/bash
+        - -c
+        - "ostree pull-local --repo=/workspace/shared-volume/$(params.repoPath) /workspace/shared-volume/$(params.blueprintName)/repo"
+    - name: rename-ref
+      image: $(params.containerImage)
+      command:
+        - /bin/bash
+        - -c
+        - "ostree refs --repo=/workspace/shared-volume/$(params.repoPath)  $(ostree show --repo=/workspace/shared-volume/$(params.repoPath) $(params.ostreeRef) | grep commit | awk '{print $2}') --create $(params.blueprintName)"
+    - name: delete-imported-ref
+      image: $(params.containerImage)
+      command:
+        - /bin/bash
+        - -c
+        - "ostree refs --repo=/workspace/shared-volume/$(params.repoPath) --delete $(params.ostreeRef)"
+  workspaces:
+    - name: shared-volume

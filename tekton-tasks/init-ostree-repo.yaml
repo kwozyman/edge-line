@@ -1,0 +1,21 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: init-ostree-repo
+spec:
+  params:
+  - name: repoPath
+    type: string
+    default: repo
+  - name: containerImage
+    type: string
+  steps:
+    - name: init-ostree-repo
+      image: $(params.containerImage)
+      command:
+        - /bin/bash
+        - -c 
+        - "ostree init --repo=/workspace/shared-volume/$(params.repoPath) --mode=archive"
+  workspaces:
+    - name: shared-volume
