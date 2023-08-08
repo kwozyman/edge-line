@@ -1,7 +1,11 @@
-name = "image-edge"
+name = "edge-sub"
 version = "0.0.1"
 modules = []
 groups = []
+
+[[packages]]
+name = "subscription-manager"
+version = "1.29.30"
 
 [[customizations.sshkey]]
 user = "root"

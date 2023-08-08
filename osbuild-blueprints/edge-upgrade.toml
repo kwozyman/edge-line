@@ -1,0 +1,12 @@
+name = "edge-sub"
+version = "0.0.1"
+modules = []
+groups = []
+
+[[packages]]
+name = "subscription-manager"
+version = "*"
+
+[[customizations.sshkey]]
+user = "root"
+key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMPkccS+SKCZEWGJzH7ew0eNPItvqeGFpOhZprmL9owO fortress_of_solitude"
