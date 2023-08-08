@@ -15,7 +15,7 @@ spec:
     default: compose.json
   - name: containerImage
     type: string
-    default: quay.io/cgament/composer-cli
+    default: quay.io/cgament/edge-line:latest
   - name: blueprintGit
     type: string
   - name: blueprintGitBranch
